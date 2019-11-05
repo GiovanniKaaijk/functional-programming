@@ -1,0 +1,25 @@
+{
+  "name": "functional-programming",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "node server.js",
+    "start": "nodemon server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GiovanniKaaijk/functional-programming.git"
+  },
+  "author": "Giovanni Kaaijk",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/GiovanniKaaijk/functional-programming/issues"
+  },
+  "homepage": "https://github.com/GiovanniKaaijk/functional-programming#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "node-fetch": "^2.6.0",
+    "nodemon": "^1.19.4"
+  }
+}
