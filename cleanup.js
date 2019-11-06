@@ -190,5 +190,20 @@ Voetbal;Mountainbiking;Computer-hardware;Handel in technologie;Video-gamen;Meube
 
 Games, tekenen, gitaar, muziek maken
 `
-let newStringArray = string2.split("\n").map(current => current.replace(/,/g, ";")).join("\n");
+// /\w*;\w*\b|\w*;/g
+function removeSpace(stringArray) {
+    stringArray.map(current => { 
+        current = current.split(";").map(stringItem => stringItem.trim());
+        for(let i=0; i<current.length -1 ;i++) {
+            current[i] = current[i] + ';';
+        }
+    })
+    return stringArray.join("\n")
+}
+
+
+let newStringArray = string2.split("\n").map(current => current.replace(/,/g, ";"))//.join("\n");
+newStringArray = removeSpace(newStringArray);
 console.log(newStringArray);
+
+//console.log(newStringArray);
