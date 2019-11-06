@@ -191,19 +191,20 @@ Voetbal;Mountainbiking;Computer-hardware;Handel in technologie;Video-gamen;Meube
 Games, tekenen, gitaar, muziek maken
 `
 // /\w*;\w*\b|\w*;/g
-function removeSpace(stringArray) {
-    stringArray.map(current => { 
-        current = current.split(";").map(stringItem => stringItem.trim());
-        for(let i=0; i<current.length -1 ;i++) {
-            current[i] = current[i] + ';';
-        }
-    })
-    return stringArray.join("\n")
+function removeSpace(string) {
+//splitting the string on new row
+    let stringArray = string.split("\n")
+//mapping to replace every , into ;
+        .map(singlePerson => singlePerson.replace(/,/g, ";"))
+//splitting again to get an array of all the hobbies
+        .map(currentPerson => currentPerson = currentPerson.split(";")
+//mapping to delete the first space of a hobby if there is a space
+            .map(hobby => hobby.replace(/^\s/gm, ''))
+//binding the array with hobbies back to 1 string
+            .join(";"))
+//binding all persons back to 1 string
+        .join("\n")
+
+    return stringArray
 }
-
-
-let newStringArray = string2.split("\n").map(current => current.replace(/,/g, ";"))//.join("\n");
-newStringArray = removeSpace(newStringArray);
-console.log(newStringArray);
-
-//console.log(newStringArray);
+console.log(removeSpace(string2));
