@@ -83,22 +83,30 @@ Meer dan 25000
 Geen studieschuld
 
 `
-let stringArray = string.split("\n");
-let newArray = [];
+/**
+ * 
+ * @param {*} string This is the raw string
+ * @returns {String} string with single numbers
+ */
+function debtToNumbers(string) {
+    let stringArray = string.split("\n");
+    let newArray = [];
 
-for(let thisString of stringArray){
-    if(thisString.includes("Geen studieschuld")) {
-        newArray.push(thisString.replace("Geen studieschuld", 0))
-    } else if (thisString.includes("Meer dan 25000")) {
-        newArray.push('25000+')
-    } else if (thisString.length > 0) {
-        let currentItem = thisString.split("-")
-            .map(item => parseInt(item))
-            .reduce((val1, val2) => (val1 + val2)/2);
-        newArray.push(currentItem)
+    for(let thisString of stringArray){
+        if(thisString.includes("Geen studieschuld")) {
+            newArray.push(thisString.replace("Geen studieschuld", 0))
+        } else if (thisString.includes("Meer dan 25000")) {
+            newArray.push('25000+')
+        } else if (thisString.length > 0) {
+            let currentItem = thisString.split("-")
+                .map(item => parseInt(item))
+                .reduce((val1, val2) => (val1 + val2)/2);
+            newArray.push(currentItem)
+        }
     }
+    return newArray = newArray.join("\n");
 }
-newArray = newArray.join("\n");
+debtToNumbers(string);
 
 // function filterData(string, oldValue, newValue) {
 //     return string.map(currentString => currentString.replace(oldValue, newValue))
@@ -191,15 +199,23 @@ Voetbal;Mountainbiking;Computer-hardware;Handel in technologie;Video-gamen;Meube
 Games, tekenen, gitaar, muziek maken
 `
 // /\w*;\w*\b|\w*;/g
-function removeSpace(string) {
-//splitting the string on new row
+
+/**
+ * This function returns a string without any spaces. Also any , get replaced by ;
+ * @param {*} string This is the raw string 
+ * @returns {String} string without spaces or ,
+ */
+function removeSpace(string, replaceBy) {
+/**
+ * Splits the string at any enter
+ */
     let stringArray = string.split("\n")
 //mapping to replace every , into ;
-        .map(singlePerson => singlePerson.replace(/,/g, ";"))
+        .map(singlePerson => singlePerson.replace(/,/g, replaceBy))
 //splitting again to get an array of all the hobbies
         .map(currentPerson => currentPerson = currentPerson.split(";")
 //mapping to delete the first space of a hobby if there is a space
-            .map(hobby => hobby.replace(/^\s/gm, ''))
+            .map(hobby => hobby.replace(/^\s|\s$/gm, ''))
 //binding the array with hobbies back to 1 string
             .join(";"))
 //binding all persons back to 1 string
@@ -207,4 +223,4 @@ function removeSpace(string) {
 
     return stringArray
 }
-console.log(removeSpace(string2));
+console.log(removeSpace(string2, ';'));
