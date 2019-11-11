@@ -7,7 +7,7 @@ PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 PREFIX dc: <http://purl.org/dc/elements/1.1/>
 PREFIX dct: <http://purl.org/dc/terms/>
 
-SELECT ?cho ?placeName ?year WHERE {
+SELECT ?cho ?placeName WHERE {
     ?place skos:prefLabel ?placeName .
     ?cho dct:spatial ?place ;
             dct:created ?year .

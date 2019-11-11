@@ -213,14 +213,14 @@ function removeSpace(string, replaceBy) {
 //mapping to replace every , into ;
         .map(singlePerson => singlePerson.replace(/,/g, replaceBy))
 //splitting again to get an array of all the hobbies
-        .map(currentPerson => currentPerson = currentPerson.split(";")
+        .map(currentPerson => currentPerson = currentPerson.split(replaceBy)
 //mapping to delete the first space of a hobby if there is a space
             .map(hobby => hobby.replace(/^\s|\s$/gm, ''))
 //binding the array with hobbies back to 1 string
-            .join(";"))
+            .join(replaceBy))
 //binding all persons back to 1 string
         .join("\n")
 
     return stringArray
 }
-console.log(removeSpace(string2, ';'));
+removeSpace(string2, ';');
