@@ -18,7 +18,7 @@ svg {
 }
 
 path.country {
-	fill: #033033;
-  stroke: rgb(255,255,255);
+	/* fill: #033033; */
+  stroke: rgb(0,0,0);
   stroke-opacity: .2;
 }

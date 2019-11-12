@@ -1,25 +1,29 @@
 const svg = d3.select('svg');
+const countryArray = [];
+let cities = [];
+let dataCount = [];
 
-const rendermap = function (d3, topojson) {
-    const worldMap = d3.geoNaturalEarth1(); //comes in different styles on d3
-    const pathCreator = d3.geoPath().projection(worldMap);
+const cityToCountry = (fetchurl) => {
+    fetch(fetchurl)
+    .then(response => response.json())
+    .then(json => {       
+        cities = json;
+    })
+}
+cityToCountry('https://raw.githubusercontent.com/samayo/country-json/master/src/country-by-capital-city.json')
 
-    svg.append('path')
-        .attr('class', 'sphere')
-        .attr('d', pathCreator({type: 'Sphere'}));
-
-    d3.json('https://unpkg.com/world-atlas@1.1.4/world/110m.json')
-        .then(json => {
-        console.log(json, json.objects.countries);
-            const countries = topojson.feature(json, json.objects.countries);
-            svg.selectAll('path')
-            .data(countries.features)
-                .enter()
-                    .append('path')
-                    .attr('d', pathCreator)
-                    .attr('class', 'country')
-        });
-}(d3, topojson);
+const rendermap = (d3) => {
+        
+        d3.json('http://enjalot.github.io/wwsd/data/world/world-110m.geojson')
+            .then(json => {
+                json.features.forEach((feature, i) => {
+                    countryArray.push(feature.properties.name);
+                    dataCount.push(feature)
+                    dataCount[i].properties.count = 0;
+                });
+            })
+};
+rendermap(d3);
   
 //https://www.youtube.com/watch?v=Qw6uAg3EO64
 
@@ -37,7 +41,7 @@ SELECT ?cho ?placeName WHERE {
     ?cho dct:spatial ?place ;
             dct:created ?year .
     } 
-    LIMIT 5
+    LIMIT 10000
 `;
 
 let results = [];
@@ -47,16 +51,47 @@ const runQuery = (url, query) => {
     fetch(url + "?query=" + encodeURIComponent(query) + "&format=json")
     .then(res => res.json())
     .then(json => {
+        let highestCount = 0;
+
         results = json.results.bindings;
-        console.log(results);
-        svg.append('g').attr('class', 'circles')
-        d3.selectAll('.circles')
-            .data(results)
+        results.forEach((result) => {
+            if(!countryArray.includes(result.placeName.value)){
+                cities.forEach((city) => {
+                    if(city.city == result.placeName.value){
+                        result.placeName.value = city.country;
+                    }
+                });
+            }
+        });
+        results.forEach(result => {
+            if(countryArray.includes(result.placeName.value)) {
+                dataCount.forEach((counter) => {
+                    if(counter.properties.name == result.placeName.value){
+                        counter.properties.count = counter.properties.count += 1;
+                        if(counter.properties.count > highestCount) {
+                            highestCount = counter.properties.count;
+                        }
+                    }
+                });
+            }
+        })
+        const worldMap = d3.geoNaturalEarth1(); //comes in different styles on d3
+        const pathCreator = d3.geoPath().projection(worldMap);
+        svg.append('path')
+            .attr('class', 'sphere')
+            .attr('d', pathCreator({type: 'Sphere'}));
+        console.log(dataCount);
+        let scale = d3.scaleLinear()
+            .domain([0, highestCount])
+            .range(['#c6c6c6', '#033033']);
+        svg.selectAll('path')
+            .data(dataCount) 
             .enter()
-                .append('circle')
-                .attr('cx', 50)
-                .attr('cy', 50)
-                .attr('r', 10)
-    });
+            .append('path')
+                .attr('d', pathCreator)
+                .attr('class', 'country')
+                .style('fill', function (d) { return scale(d.properties.count) })
+
+    })
 };
 runQuery(url, query);
