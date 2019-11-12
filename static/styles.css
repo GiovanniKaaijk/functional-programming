@@ -7,6 +7,7 @@ body main {
   width: 100%;
   min-height: 100vh;
   display: flex;
+  flex-direction: column;
 }
 
 svg {
@@ -14,11 +15,10 @@ svg {
 }
 
 .sphere {
-  fill: #DCEDFF;
+  fill: rgb(208, 230, 255);
 }
 
 path.country {
 	/* fill: #033033; */
-  stroke: rgb(0,0,0);
   stroke-opacity: .2;
 }
