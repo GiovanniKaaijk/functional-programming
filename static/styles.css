@@ -10,7 +10,7 @@ body main {
   flex-direction: column;
 }
 
-svg {
+.tooltip {
   margin: 10vh auto auto auto;
 }
 
@@ -21,4 +21,24 @@ svg {
 path.country {
 	/* fill: #033033; */
   stroke-opacity: .2;
+}
+
+.timeline {
+  display: flex;
+  width: 100%;
+  border-bottom: 1px solid black;
+  height: 30px;
+  margin: 0 auto;
+  margin-bottom: 40px;
+}
+.timeline div {
+  margin: 0 auto 50px;
+  cursor: pointer;
+}
+
+.tooltip div{
+  background-color: rgba(255,255,255,.95);
+  padding: 10px;
+  border-radius: 8px;
+  border: .5px solid rgba(33,33,33,.3)
 }

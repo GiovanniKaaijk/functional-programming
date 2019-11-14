@@ -1,7 +1,15 @@
 const svg = d3.select('svg');
+svg.append('g')
+const g = d3.select('g');
+const zoom = d3.zoom();
 const countryArray = [];
 let cities = [];
 let dataCount = [];
+let tooltip = d3.select(".tooltip")
+  .append("div")
+    .style("position", "absolute")
+
+
 
 const cityToCountry = (fetchurl) => {
     fetch(fetchurl)
@@ -65,23 +73,33 @@ const runQuery = (url, query) => {
         })
         const worldMap = d3.geoNaturalEarth1(); //natural earth gives a good realistic view of the map
         const pathCreator = d3.geoPath().projection(worldMap);
-        svg.append('path')
+        g.append('path')
             .attr('class', 'sphere')
             .attr('d', pathCreator({type: 'Sphere'}));
         let scaleColor = d3.scaleLinear()
-            .domain([0, highestCount])
-            .range(['#e6e6e6', '#033033']);
-        let scaleStroke = d3.scaleLinear()
-            .domain([0, highestCount])
-            .range(['#000000', '#ffffff'])
-        svg.selectAll('path')
+            .domain([0, (highestCount - 1000)])
+            .range(['#ffffff', 'red']);
+        g.selectAll('path')
             .data(dataCount) 
             .enter()
             .append('path')
                 .attr('d', pathCreator)
                 .attr('class', 'country')
                 .style('fill', (d) => scaleColor(d.properties.count))
-                .style('stroke', (d) => scaleStroke(d.properties.count))
+                .style('stroke', 'black')
+                .style('stroke-opacity', 0.2)
+                .on('mouseover', function() {
+                    d3.select(this)
+                        .style('stroke-opacity', 1)
+                })
+                .on('mouseout', function() {
+                    d3.select(this)
+                        .style('stroke-opacity', 0.2)
+                    tooltip.style("visibility", "hidden")
+                })
+                .on("click", function(d){return tooltip.style("visibility", "visible").text(d.properties.name)
+                ;})
+                .on("mousemove", function(){return tooltip.style("top", (event.pageY-40)+"px").style("left",(event.pageX-35)+"px");})
 
     })
 };
@@ -92,30 +110,41 @@ const query = `
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 PREFIX dc: <http://purl.org/dc/elements/1.1/>
 PREFIX dct: <http://purl.org/dc/terms/>
+PREFIX wgs84: <http://www.w3.org/2003/01/geo/wgs84_pos#>
+PREFIX geo: <http://www.opengis.net/ont/geosparql#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX gn: <http://www.geonames.org/ontology#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 
-SELECT ?cho ?placeName WHERE {
-
-    ?placeBroader skos:prefLabel ?placeName .
-    ?cho dct:spatial ?place ;
-            dct:created ?year .
-    ?place skos:broader ?placeBroader .
+SELECT ?cho ?placeName ?date WHERE {
+    ?cho skos:exactMatch/gn:parentCountry ?land .
+    ?land gn:name ?placeName .
+    OPTIONAL { ?cho dct:created ?date }
     } 
     LIMIT 50000
 `;
 
 runQuery(url, query);
 
-const timeLine = () => {
-    let nodes = document.querySelectorAll('.timeline div')
-    nodes.forEach(element => {
-        let content = element.textContent;
-        content = content.split("-")
+const changeQuery = function() {
+    let content = this.textContent;
+        content = content.split("-");
         let selectedTime = {
             firstValue: content[0],
             secondValue: content[1]
         } 
         console.log(selectedTime)
-    })
 }
 
+const timeLine = () => {
+    let nodes = document.querySelectorAll('.timeline div')
+    nodes.forEach(element => {
+        element.addEventListener('click', changeQuery)
+    })
+}
 timeLine();
+
+svg.call(zoom.on('zoom', () => {
+    g.attr('transform', d3.event.transform);
+}))
