@@ -14,7 +14,8 @@ let tooltip = d3.select(".tooltip")
 const cityToCountry = (fetchurl) => {
     fetch(fetchurl)
     .then(response => response.json())
-    .then(json => {       
+    .then(json => {    
+        console.log(json)   
         cities = json;
     })
 }
@@ -97,9 +98,8 @@ const runQuery = (url, query) => {
                         .style('stroke-opacity', 0.2)
                     tooltip.style("visibility", "hidden")
                 })
-                .on("click", function(d){return tooltip.style("visibility", "visible").text(d.properties.name)
-                ;})
-                .on("mousemove", function(){return tooltip.style("top", (event.pageY-40)+"px").style("left",(event.pageX-35)+"px");})
+                .on("click", (d) => { tooltip.style("visibility", "visible").text(d.properties.name + ' = ' + d.properties.count)})
+                .on("mousemove", () => { tooltip.style("top", (event.pageY-40)+"px").style("left",(event.pageX-35)+"px")})
 
     })
 };
