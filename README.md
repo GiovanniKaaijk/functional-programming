@@ -3,7 +3,7 @@
 The perfect website to discover more about your most favorite spots in the wold.
 <img width="750" alt="Schermafbeelding 2019-10-18 om 11 09 20" src="https://user-images.githubusercontent.com/43671292/68860278-82cf6d00-06e9-11ea-92b6-07dba0ee7684.png">
 
-## Table of Contents 🗃
+## Table of Contents
 
 - [Wiki](#Wiki)
 - [Description](#Description)

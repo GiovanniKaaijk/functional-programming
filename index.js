@@ -34,7 +34,7 @@ const rendermapLayout = (d3) => {
         })
 };
 rendermapLayout(d3); 
-//https://www.youtube.com/watch?v=Qw6uAg3EO64
+// Used https://www.youtube.com/watch?v=Qw6uAg3EO64 to render the map
 
 // Take first + second value from timeline click to put in an array later on
 const changeQuery = function() {
@@ -57,7 +57,7 @@ const timeLine = () => {
 }
 timeLine();
 
-// Map zoom function
+// Map zoom function, got some help from Ramon
 svg.call(zoom.on('zoom', () => {
     g.attr('transform', d3.event.transform);
 }))
@@ -128,7 +128,7 @@ const runQuery = (url, query) => {
                 .on("click", (d) => { 
                     tooltip
                     .style("visibility", "visible")
-                    .text(d.properties.name + ' = ' + d.properties.count + ' objecten')
+                    .text(d.properties.name + ': ' + d.properties.count + ' objecten')
                 })
                 .on("mousemove", (d) => {
                     tooltip
