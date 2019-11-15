@@ -5,12 +5,13 @@ const zoom = d3.zoom();
 const countryArray = [];
 let cities = [];
 let dataCount = [];
+//Create a div inside the parent group to show country name + object count
 let tooltip = d3.select(".tooltip")
   .append("div")
     .style("position", "absolute")
+    .style("visibility", "hidden")
 
-
-
+// Fetch JSON with all capital cities + countries
 const cityToCountry = (fetchurl) => {
     fetch(fetchurl)
     .then(response => response.json())
@@ -21,6 +22,7 @@ const cityToCountry = (fetchurl) => {
 }
 cityToCountry('https://raw.githubusercontent.com/samayo/country-json/master/src/country-by-capital-city.json')
 
+// Fetch map layout JSON + create an array containing unique countries
 const rendermapLayout = (d3) => {     
     d3.json('http://enjalot.github.io/wwsd/data/world/world-110m.geojson')
         .then(json => {
@@ -31,11 +33,36 @@ const rendermapLayout = (d3) => {
             });
         })
 };
-rendermapLayout(d3);
-  
+rendermapLayout(d3); 
 //https://www.youtube.com/watch?v=Qw6uAg3EO64
 
+// Take first + second value from timeline click to put in an array later on
+const changeQuery = function() {
+    let content = this.textContent;
+        content = content.split("-");
+        let selectedTime = {
+            firstValue: content[0],
+            secondValue: content[1]
+        } 
+        console.log(selectedTime)
+        return selectedTime;
+}
 
+// Create eventlistener for every timeline object
+const timeLine = () => {
+    let nodes = document.querySelectorAll('.timeline div')
+    nodes.forEach(element => {
+        element.addEventListener('click', changeQuery)
+    })
+}
+timeLine();
+
+// Map zoom function
+svg.call(zoom.on('zoom', () => {
+    g.attr('transform', d3.event.transform);
+}))
+
+// Run the SPAQRL query, render every element, create counts for the heatmap
 const runQuery = (url, query) => {
     // Call the url with the query attached, output data
     fetch(url + "?query=" + encodeURIComponent(query) + "&format=json")
@@ -98,14 +125,19 @@ const runQuery = (url, query) => {
                         .style('stroke-opacity', 0.2)
                     tooltip.style("visibility", "hidden")
                 })
-                .on("click", (d) => { tooltip.style("visibility", "visible").text(d.properties.name + ' = ' + d.properties.count)})
-                .on("mousemove", () => { tooltip.style("top", (event.pageY-40)+"px").style("left",(event.pageX-35)+"px")})
-
+                .on("click", (d) => { 
+                    tooltip
+                    .style("visibility", "visible")
+                    .text(d.properties.name + ' = ' + d.properties.count)
+                })
+                .on("mousemove", (d) => {
+                    tooltip
+                    .style("top", (event.pageY-40)+"px")
+                    .style("left",(event.pageX-35)+"px")})
     })
 };
 
 
-const url = "https://api.data.netwerkdigitaalerfgoed.nl/datasets/ivo/NMVW/services/NMVW-02/sparql";
 const query = `
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 PREFIX dc: <http://purl.org/dc/elements/1.1/>
@@ -125,26 +157,4 @@ SELECT ?cho ?placeName ?date WHERE {
     LIMIT 50000
 `;
 
-runQuery(url, query);
-
-const changeQuery = function() {
-    let content = this.textContent;
-        content = content.split("-");
-        let selectedTime = {
-            firstValue: content[0],
-            secondValue: content[1]
-        } 
-        console.log(selectedTime)
-}
-
-const timeLine = () => {
-    let nodes = document.querySelectorAll('.timeline div')
-    nodes.forEach(element => {
-        element.addEventListener('click', changeQuery)
-    })
-}
-timeLine();
-
-svg.call(zoom.on('zoom', () => {
-    g.attr('transform', d3.event.transform);
-}))
+runQuery('https://api.data.netwerkdigitaalerfgoed.nl/datasets/ivo/NMVW/services/NMVW-02/sparql', query);
