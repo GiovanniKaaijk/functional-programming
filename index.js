@@ -24,7 +24,7 @@ cityToCountry('https://raw.githubusercontent.com/samayo/country-json/master/src/
 
 // Fetch map layout JSON + create an array containing unique countries
 const rendermapLayout = (d3) => {     
-    d3.json('http://enjalot.github.io/wwsd/data/world/world-110m.geojson')
+    d3.json('https://enjalot.github.io/wwsd/data/world/world-110m.geojson')
         .then(json => {
             json.features.forEach((feature, i) => {
                 countryArray.push(feature.properties.name);
@@ -128,7 +128,7 @@ const runQuery = (url, query) => {
                 .on("click", (d) => { 
                     tooltip
                     .style("visibility", "visible")
-                    .text(d.properties.name + ' = ' + d.properties.count)
+                    .text(d.properties.name + ' = ' + d.properties.count + ' objecten')
                 })
                 .on("mousemove", (d) => {
                     tooltip
