@@ -34,7 +34,8 @@ const rendermapLayout = (d3) => {
         })
 };
 rendermapLayout(d3); 
-// Used https://www.youtube.com/watch?v=Qw6uAg3EO64 to render the map
+// Used https://www.youtube.com/watch?v=Qw6uAg3EO64 to render the map. 
+// I used this tutorial to get to know how to render a map. After i completed this tutorial, i changed it so that my own data get's rendered
 
 // Take first + second value from timeline click to put in an array later on
 const changeQuery = function() {
@@ -57,7 +58,7 @@ const timeLine = () => {
 }
 timeLine();
 
-// Map zoom function, got some help from Ramon
+// Map zoom function
 svg.call(zoom.on('zoom', () => {
     g.attr('transform', d3.event.transform);
 }))
@@ -137,7 +138,6 @@ const runQuery = (url, query) => {
     })
 };
 
-
 const query = `
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 PREFIX dc: <http://purl.org/dc/elements/1.1/>
@@ -154,7 +154,7 @@ SELECT ?cho ?placeName ?date WHERE {
     ?land gn:name ?placeName .
     OPTIONAL { ?cho dct:created ?date }
     } 
-    LIMIT 50000
+    LIMIT 10000
 `;
 
 runQuery('https://api.data.netwerkdigitaalerfgoed.nl/datasets/ivo/NMVW/services/NMVW-02/sparql', query);
