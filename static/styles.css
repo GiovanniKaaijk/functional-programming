@@ -21,6 +21,7 @@ body main {
 path.country {
 	/* fill: #033033; */
   stroke-opacity: .2;
+  transition: all .15s;
 }
 
 .timeline {
