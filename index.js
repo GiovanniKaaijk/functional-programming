@@ -5,37 +5,18 @@ const g = d3.select('g');
 
 const worldMap = d3.geoNaturalEarth1(); //natural earth gives a good realistic view of the map
 const pathCreator = d3.geoPath().projection(worldMap);
+const api = 'https://api.data.netwerkdigitaalerfgoed.nl/datasets/ivo/NMVW/services/NMVW-02/sparql';
 
-const state = {
+let state = {
     countryArray: [],
     cityArray: [],
     dataCount: [],
     highestCount: 0,
-    yearFilter: {
+    timeFilter: {
         firstValue: 0,
         secondValue: 500
     }
 }
-
-const api = 'https://api.data.netwerkdigitaalerfgoed.nl/datasets/ivo/NMVW/services/NMVW-02/sparql';
-const query = `
-PREFIX dct: <http://purl.org/dc/terms/>
-PREFIX wgs84: <http://www.w3.org/2003/01/geo/wgs84_pos#>
-PREFIX geo: <http://www.opengis.net/ont/geosparql#>
-PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-PREFIX gn: <http://www.geonames.org/ontology#>
-PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-
-SELECT ?cho ?placeName ?date WHERE {
-    ?cho dct:spatial ?place .
-    ?place skos:exactMatch/gn:parentCountry ?land .
-    ?land gn:name ?placeName .
-    ?cho dct:created ?date .
-    FILTER(xsd:integer(?date) >= ${state.yearFilter.firstValue} && xsd:integer(?date) <= ${state.yearFilter.secondValue})
-} LIMIT 50000 
-`;
-
 
 //Create a div inside the parent group to show country name + object count
 let tooltip = d3.select(".tooltip")
@@ -44,15 +25,14 @@ let tooltip = d3.select(".tooltip")
     .style("visibility", "hidden")
 
 // Fetch JSON with all capital cities + countries
-const cityToCountry = (fetchurl) => {
+const fetchCityToCountry = (fetchurl) => {
     fetch(fetchurl)
     .then(response => response.json())
     .then(json => {    
-        console.log(json)   
         state.cityArray = json;
     })
 }
-cityToCountry('https://raw.githubusercontent.com/samayo/country-json/master/src/country-by-capital-city.json')
+fetchCityToCountry('https://raw.githubusercontent.com/samayo/country-json/master/src/country-by-capital-city.json')
 
 // Fetch map layout JSON + create an array containing unique countries
 const rendermapLayout = (d3) => {     
@@ -77,18 +57,9 @@ const changeQuery = function() {
             firstValue: content[0],
             secondValue: content[1]
         } 
-        console.log(selectedTime)
-        return selectedTime;
+        updateTime(selectedTime)
 }
 
-// Create eventlistener for every timeline object
-const timeLine = () => {
-    let nodes = document.querySelectorAll('.timeline div')
-    nodes.forEach(element => {
-        element.addEventListener('click', changeQuery)
-    })
-}
-timeLine();
 
 // Map zoom function
 svg.call(zoom.on('zoom', () => {
@@ -122,6 +93,10 @@ const changeCityToCountry = results => {
 }
 //check if any placename is equal to one of the countries, if so -> country count + 1
 const countTracker = results => {
+    state.dataCount.forEach(counter => {
+        counter.properties.count = 0
+    })
+    state.highestCount = 0;
     results.forEach(result => {
         if(state.countryArray.includes(result.placeName)) {
             state.dataCount.forEach((counter) => {
@@ -134,6 +109,33 @@ const countTracker = results => {
             });
         }
     })
+}
+// Updates time filter
+const updateTime = (time) => {
+    state.timeFilter = {
+        firstValue: time.firstValue,
+        secondValue: time.secondValue
+    }
+    updateData()
+}
+
+// Returns the new query
+const getQuery = () => {
+    return `PREFIX dct: <http://purl.org/dc/terms/>
+    PREFIX wgs84: <http://www.w3.org/2003/01/geo/wgs84_pos#>
+    PREFIX geo: <http://www.opengis.net/ont/geosparql#>
+    PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+    PREFIX gn: <http://www.geonames.org/ontology#>
+    PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+    
+    SELECT ?cho ?placeName ?date WHERE {
+        ?cho dct:spatial ?place .
+        ?place skos:exactMatch/gn:parentCountry ?land .
+        ?land gn:name ?placeName .
+        ?cho dct:created ?date .
+        FILTER(xsd:integer(?date) >= ${state.timeFilter.firstValue} && xsd:integer(?date) <= ${state.timeFilter.secondValue})
+    } LIMIT 50000 `
 }
 
 // Render all elements on the SVG
@@ -177,9 +179,9 @@ const renderSVG = () => {
 }
 
 // Run the SPAQRL query, render every element, create counts for the heatmap
-const runQuery = (url, query) => {
+const runQuery = (api, query) => {
     // Call the url with the query attached, output data
-    fetch(url + "?query=" + encodeURIComponent(query) + "&format=json")
+    fetch(api + "?query=" + encodeURIComponent(query) + "&format=json")
     .then(res => res.json())
     .then(json => {
         //change results placename to match more items in the following forEach. If item is not in city JSON -> delete
@@ -199,5 +201,47 @@ const runQuery = (url, query) => {
         renderSVG()
     })
 };
+runQuery(api, getQuery());
 
-runQuery(api, query);
+// Create eventlistener for every timeline object
+const timeLine = () => {
+    let nodes = document.querySelectorAll('.timeline div')
+    nodes.forEach(element => {
+        element.addEventListener('click', changeQuery)
+    })
+}
+timeLine();
+
+// Updates data
+async function updateData() {
+    let newQuery = getQuery()
+
+    await runNewQuery(api, newQuery)
+    let scaleColor = d3.scaleLinear()
+        .domain([0, (state.highestCount)])
+        .range(['#ffffff', 'red']);
+    svg.selectAll('g')
+        .data(state.dataCount)
+        .enter()
+        .selectAll('.country')
+        .style('fill', (d) => scaleColor(d.properties.count))
+}
+
+async function runNewQuery(api, query) {
+    await fetch(api + "?query=" + encodeURIComponent(query) + "&format=json")
+    .then(res => res.json())
+    .then(json => {
+        console.log(json.results.bindings)
+        let results = json.results.bindings;
+        results.forEach((result, i) => {
+            if(result.date.value.includes('-')) {
+                dateFormat(result.date.value)
+            }
+            results[i] = {
+                placeName: result.placeName.value,
+                date: result.date.value
+            }
+        })
+        countTracker(results)
+    })
+}
