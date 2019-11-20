@@ -6,12 +6,17 @@ const g = d3.select('g');
 const worldMap = d3.geoNaturalEarth1(); //natural earth gives a good realistic view of the map
 const pathCreator = d3.geoPath().projection(worldMap);
 const api = 'https://api.data.netwerkdigitaalerfgoed.nl/datasets/ivo/NMVW/services/NMVW-02/sparql';
+const playButton = document.querySelector('.play')
+const currentSlider = document.querySelector('.current');
 
 let state = {
     countryArray: [],
     cityArray: [],
     dataCount: [],
     highestCount: 0,
+    uniqueNodes: [],
+    currentTime: 0,
+    nodeWidth: 0,
     timeFilter: {
         firstValue: 0,
         secondValue: 500
@@ -49,14 +54,23 @@ rendermapLayout(d3);
 // Used https://www.youtube.com/watch?v=Qw6uAg3EO64 to render the map. 
 // I used this tutorial to get to know how to render a map. After i completed this tutorial, i changed it so that my own data get's rendered
 
+// push unique values to array for the timeline later one
+const pushToArray = function(element) {
+    let node = element.textContent
+    state.uniqueNodes.push(node)
+}
+
 // Take first + second value from timeline click to put in an array later on
 const changeQuery = function() {
-    let content = this.textContent;
+    let index = state.uniqueNodes.indexOf(this.textContent)
+    state.currentTime = index
+    currentSlider.style.left = state.nodeWidth * index + 'px';
+    let content = state.uniqueNodes[index]
         content = content.split("-");
         let selectedTime = {
             firstValue: content[0],
             secondValue: content[1]
-        } 
+        }
         updateTime(selectedTime)
 }
 
@@ -174,8 +188,10 @@ const renderSVG = () => {
             .style("top", (event.pageY-40)+"px")
             .style("left",(event.pageX-35)+"px")})
         .transition()
-        .duration(600)
-        .style('fill', (d) => scaleColor(d.properties.count))
+        .duration(300)
+        .style('fill', (d) => scaleColor(d.properties.count));
+        
+        playButton.addEventListener('click', playTimeline)
 }
 
 // Run the SPAQRL query, render every element, create counts for the heatmap
@@ -205,8 +221,12 @@ runQuery(api, getQuery());
 
 // Create eventlistener for every timeline object
 const timeLine = () => {
-    let nodes = document.querySelectorAll('.timeline div')
+    let nodes = document.querySelectorAll('.timeline p')
+    let currentWidth = screen.width / nodes.length
+    state.nodeWidth = currentWidth
+    currentSlider.style.width = state.nodeWidth+'px'
     nodes.forEach(element => {
+        pushToArray(element)
         element.addEventListener('click', changeQuery)
     })
 }
@@ -224,6 +244,8 @@ async function updateData() {
         .data(state.dataCount)
         .enter()
         .selectAll('.country')
+        .transition()
+        .duration(300)
         .style('fill', (d) => scaleColor(d.properties.count))
 }
 
@@ -244,4 +266,34 @@ async function runNewQuery(api, query) {
         })
         countTracker(results)
     })
+}
+
+const playTimeline = () => {
+    callbackFn(0, callbackFn)
+}
+
+function callbackFn(index, callback) {
+    currentSlider.classList.contains('active') ? null : currentSlider.classList.add('active')
+    console.log(state.uniqueNodes[index]);
+    let length = state.uniqueNodes.length
+    state.currentTime != length-1 ?
+        state.currentTime += 1 :
+        state.currentTime = 0
+    setTimeout(() => {
+        currentSlider.style.left = state.nodeWidth * index + 'px';
+    }, 300);
+    
+    let content = state.uniqueNodes[state.currentTime]
+    content = content.split('-')
+    console.log(content)
+    let selectedTime = {
+        firstValue: content[0],
+        secondValue: content[1]
+    }
+    updateTime(selectedTime)
+    setTimeout(() => {
+        index < state.uniqueNodes.length-1
+        ? callbackFn(index + 1, callback)
+        : null;
+    }, 1500);
 }
