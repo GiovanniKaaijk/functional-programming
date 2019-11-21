@@ -3,15 +3,17 @@
   <head>
     <title>World map</title>
     <link rel="stylesheet" href="static/styles.css" />
-    <!-- <script src="https://unpkg.com/d3@5.9.2/dist/d3.min.js"></script> -->
   </head>
   <body>
     <main>
-        <div class="tooltip">
+        <div class="wrapper">
           <svg height="500" width="960"></svg>
+          <svg class="events">
+            
+          </svg>
         </div>
         <div class="timeline-wrapper">
-          <span class="play">Play button</span>
+          <div class="play"><img src="static/images/play.svg" alt="playbutton"></div>
             <div class="timeline">
               <div class="current"></div>
                 <p>0-500</p>
@@ -24,7 +26,6 @@
     </main>
     
     <script src="https://d3js.org/d3-zoom.v1.min.js"></script>
-    <!-- <script src="https://unpkg.com/topojson@3.0.2/dist/topojson.min.js"></script> -->
     <script src="https://d3js.org/d3.v5.min.js"></script>
     <script src="index.js"></script>
   </body>

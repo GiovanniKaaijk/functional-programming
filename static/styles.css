@@ -1,6 +1,7 @@
 body {
   margin: 0px;
   overflow: hidden;
+  
 }
 
 body main {
@@ -10,8 +11,16 @@ body main {
   flex-direction: column;
 }
 
-.tooltip {
-  margin: 10vh auto auto auto;
+.wrapper {
+  margin: 10vh 50px;
+  display: flex;
+}
+
+.wrapper .events {
+  margin-left: 30px;
+}
+.wrapper .events h2 {
+  margin-top: 0;
 }
 
 .sphere {
@@ -26,7 +35,7 @@ path.country {
 
 .timeline {
   display: flex;
-  width: 100%;
+  width: 80%;
   border-bottom: 1px solid black;
   height: 50px;
   margin: 0 auto;
@@ -53,4 +62,20 @@ path.country {
 
 .current.active {
   background-color: rgba(33,33,33,.3);
+}
+
+.timeline-wrapper {
+  position: relative;
+}
+
+.play {
+  width: 40px;
+  position: absolute;
+  left: 60px;
+  top: 25px;
+  cursor: pointer;
+}
+
+.title {
+  font: 25px bold sans-serif;
 }

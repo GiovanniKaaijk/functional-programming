@@ -17,6 +17,7 @@ let state = {
     uniqueNodes: [],
     currentTime: 0,
     nodeWidth: 0,
+    stopTimer: false,
     timeFilter: {
         firstValue: 0,
         secondValue: 500
@@ -24,7 +25,7 @@ let state = {
 }
 
 //Create a div inside the parent group to show country name + object count
-let tooltip = d3.select(".tooltip")
+let tooltip = d3.select(".wrapper")
   .append("div")
     .style("position", "absolute")
     .style("visibility", "hidden")
@@ -62,6 +63,7 @@ const pushToArray = function(element) {
 
 // Take first + second value from timeline click to put in an array later on
 const changeQuery = function() {
+    state.stopTimer = true
     let index = state.uniqueNodes.indexOf(this.textContent)
     state.currentTime = index
     currentSlider.style.left = state.nodeWidth * index + 'px';
@@ -222,7 +224,7 @@ runQuery(api, getQuery());
 // Create eventlistener for every timeline object
 const timeLine = () => {
     let nodes = document.querySelectorAll('.timeline p')
-    let currentWidth = screen.width / nodes.length
+    let currentWidth = document.querySelector('.timeline').offsetWidth / nodes.length
     state.nodeWidth = currentWidth
     currentSlider.style.width = state.nodeWidth+'px'
     nodes.forEach(element => {
@@ -269,6 +271,8 @@ async function runNewQuery(api, query) {
 }
 
 const playTimeline = () => {
+    state.currentTime = 0
+    state.stopTimer = false
     callbackFn(0, callbackFn)
 }
 
@@ -276,9 +280,6 @@ function callbackFn(index, callback) {
     currentSlider.classList.contains('active') ? null : currentSlider.classList.add('active')
     console.log(state.uniqueNodes[index]);
     let length = state.uniqueNodes.length
-    state.currentTime != length-1 ?
-        state.currentTime += 1 :
-        state.currentTime = 0
     setTimeout(() => {
         currentSlider.style.left = state.nodeWidth * index + 'px';
     }, 300);
@@ -292,8 +293,17 @@ function callbackFn(index, callback) {
     }
     updateTime(selectedTime)
     setTimeout(() => {
-        index < state.uniqueNodes.length-1
-        ? callbackFn(index + 1, callback)
-        : null;
+        if(index < state.uniqueNodes.length-1 && state.stopTimer == false){
+            callbackFn(index + 1, callback)
+        }
     }, 1500);
+    state.currentTime != length-1 ?
+        state.currentTime += 1 :
+        state.currentTime = 0
 }
+
+const events = d3.select('.events').append('g').append('text')
+    .text("Historical events")
+    .attr('x', '20')
+    .attr('y', '20')
+    .attr('class', 'title')
